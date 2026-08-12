@@ -1,0 +1,447 @@
+/* ==========================================
+   🎮 GLOBAL FULL-SCREEN ARCADE LAYOUT 
+   ========================================== */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%; /* ✅ FULLSCREEN FIX: 100vw includes the width of any scrollbar the browser
+                   reserves, which pushed content past the visible area and produced a
+                   horizontal scrollbar of its own — 100% avoids that entirely. */
+  height: 100dvh; /* ✅ MOBILE FIX: dvh accounts for the mobile browser's address/nav bar — vh was causing clipped/overflowing content */
+  overflow: hidden; /* Lock the screen to avoid unwanted scrolling */
+  overflow-x: hidden; /* ✅ Belt-and-suspenders: never allow horizontal scroll, in or out of fullscreen */
+  background-color: #12131a;
+  color: #ffffff;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+/* ✅ FULLSCREEN FIX: the element the Fullscreen API is applied to (documentElement) doesn't
+   automatically inherit the width:100% rule above once the browser hands it native fullscreen
+   sizing — some mobile browsers otherwise leave a sliver of unstyled space/scroll around the
+   edges. Pinning it explicitly guarantees the game canvas fills the entire fullscreen surface. */
+html:fullscreen, html:-webkit-full-screen,
+body:fullscreen, body:-webkit-full-screen {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Base custom variables matching your dark theme */
+:root {
+  --accent: #3498db;
+  --accent-bg: rgba(52, 152, 219, 0.15);
+  --accent-border: #2980b9;
+  --danger: #e74c3c;
+  --panel-bg: #1c1d26;
+  --border: #2c2d38;
+}
+
+/* ==========================================
+   🎯 FULL-SCREEN GAME CORE STRUCTURE
+   ========================================== */
+.fullscreen-game-container {
+  width: 100%; /* ✅ FULLSCREEN FIX: see html/body/#root note above */
+  height: 100dvh; /* ✅ MOBILE FIX: was 100vh */
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Global scaling factor - makes everything text/UI scale up nicely */
+body {
+  font-size: 1.25rem; /* Standardizing on a larger baseline */
+}
+
+/* ==========================================
+   🎰 SCALED WHEEL & INTERACTION ELEMENTS 
+   ========================================== */
+.counter {
+  font-size: 20px; /* Made larger */
+  padding: 10px 20px; /* Generous padding */
+  border-radius: 8px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 16px;
+
+  &:hover {
+    border-color: var(--accent-border);
+    background: rgba(52, 152, 219, 0.25);
+  }
+  &:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+}
+
+/* Game Status Announcements Banner */
+.announcement-banner {
+  font-size: 1.6rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 16px;
+  background-color: var(--panel-bg);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+/* ==========================================
+   ⚔️ COMBAT SQUAD & ENEMY LAYOUT GRIDS
+   ========================================== */
+.game-grid-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Big Interactive Panels */
+.game-card-panel {
+  background: var(--panel-bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  flex: 1 1 400px;
+  max-width: 600px;
+}
+
+/* Buttons sizing adjustment */
+button {
+  font-size: 1.15rem;
+  padding: 12px 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  /* ✅ MOBILE SMOOTHNESS: touch-action removes the browser's ~300ms tap-delay
+     (it no longer has to wait to see if this is the start of a double-tap-to-zoom
+     gesture), and the highlight-color reset kills the gray flash Android/iOS paint
+     on tap — both make every button in the game feel instantly responsive. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* ==========================================
+   📱 RESPONSIVE ADJUSTMENTS (LARGE SCREENS)
+   ========================================== */
+@media (min-width: 1400px) {
+  body {
+    font-size: 1.4rem; /* Even larger sizing adjustments on giant desktop monitors */
+  }
+  
+  .fullscreen-game-container {
+    padding: 40px;
+  }
+}
+
+/* ==========================================
+   📱 RESPONSIVE ADJUSTMENTS (PHONES)
+   ✅ MOBILE FIX: the 1.25rem desktop baseline + 24px padding + 12px/24px
+   buttons were the main cause of overflow on small screens — this scales
+   everything down proportionally below 480px.
+   ========================================== */
+@media (max-width: 480px) {
+  body {
+    font-size: 0.85rem;
+  }
+
+  .fullscreen-game-container {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  button {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ==========================================
+   📱 ULTRA-NARROW SCREENS (flip phones, narrow
+   foldable cover displays)
+   ✅ One notch tighter than the 480px tier above —
+   without this, the 480px tier's own padding/button
+   sizes were still too generous for genuinely tiny
+   screens and could push content into collision.
+   ========================================== */
+@media (max-width: 340px) {
+  body {
+    font-size: 0.72rem;
+  }
+
+  .fullscreen-game-container {
+    padding: 5px;
+    gap: 5px;
+  }
+
+  button {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+}
+
+/* ==========================================
+   🔒 LANDSCAPE-ONLY ORIENTATION LOCK
+   ✅ Pure CSS, no JS orientation polling — the overlay itself decides
+   whether to show based on a media query, so rotating the device can't
+   cause a layout flash or extra re-render. Gated to <=900px so a resized
+   desktop browser window in portrait doesn't accidentally trigger it.
+   ========================================== */
+.orientation-lock-overlay {
+  display: none;
+}
+
+/* ✅ FIX: this was gated to "and (max-width: 900px)", so any device that's portrait but
+   wider than 900px (e.g. an iPad Pro 12.9" in portrait is 1024px wide, a Surface Pro is
+   ~912px+) never triggered the lock at all — the game just rendered squeezed into a
+   portrait viewport with no prompt to rotate. The game's layout only works in landscape
+   regardless of screen size, so this is keyed purely on orientation now: any portrait
+   viewport (phone or tablet) shows the prompt, any landscape viewport shows the game. */
+@media (orientation: portrait) {
+  .orientation-lock-overlay {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 18px;
+    background: radial-gradient(140% 120% at 50% -10%, #0d1f16, #081410 60%);
+    color: #bfe8cf;
+    text-align: center;
+    padding: 28px 24px;
+    box-sizing: border-box;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .orientation-lock-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(77,255,143,0.05) 0px, rgba(77,255,143,0.05) 1px, transparent 2px, transparent 4px);
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  .orientation-lock-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 90px rgba(0,0,0,0.6);
+    pointer-events: none;
+  }
+
+  /* Requirement: hide the game content while the notice is active */
+  .fullscreen-game-container {
+    display: none;
+  }
+}
+
+.orientation-lock-statusbar {
+  position: relative;
+  z-index: 2;
+  align-self: stretch;
+  display: flex;
+  justify-content: center;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: #5f8c72;
+}
+.orientation-lock-live {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #4dff8f;
+}
+.orientation-lock-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #4dff8f;
+  display: inline-block;
+  animation: orientation-blink 1.6s steps(1) infinite;
+}
+@keyframes orientation-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+
+.orientation-lock-phone-wrap {
+  position: relative;
+  z-index: 2;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.orientation-lock-phone {
+  width: 52px;
+  height: 96px;
+  border-radius: 12px;
+  background: #0a1712;
+  border: 3px solid #4dff8f;
+  box-shadow: 0 0 22px rgba(77,255,143,0.45), inset 0 0 10px rgba(77,255,143,0.15);
+  animation: orientation-rotate-hint 2.6s ease-in-out infinite;
+  position: relative;
+}
+.orientation-lock-notch {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background: #2c3a33;
+}
+.orientation-lock-glow-screen {
+  position: absolute;
+  inset: 8px 6px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(77,255,143,0.18), rgba(77,255,143,0.04));
+}
+
+.orientation-lock-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 280px;
+}
+
+.orientation-lock-content h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(12px, 3.6vw, 15px);
+  color: #4dff8f;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 12px rgba(77,255,143,0.55);
+  margin: 0;
+}
+
+.orientation-lock-content p {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: #bfe8cf;
+  margin: 0;
+}
+
+@keyframes orientation-rotate-hint {
+  0%, 15%   { transform: rotate(0deg); }
+  45%, 60%  { transform: rotate(-90deg); }
+  90%, 100% { transform: rotate(0deg); }
+}
+
+/* ==========================================
+   ⛶ GLOBAL FULLSCREEN TOGGLE
+   Pinned bottom-right so it never collides with the in-game header buttons
+   (Help/Dex/Board/Settings, top-center) or with modal close buttons
+   (top-right of their own panels). Sits above game content but below the
+   orientation-lock overlay (99999) and modals (999-1000).
+   ✅ FIX: this was z-index 500 — identical to the full-screen Loading, Game Over,
+   and Victory phase overlays. Equal z-index stacks by DOM order, and those phase
+   screens render later (nested deep inside GameScreen) than this button (a sibling
+   earlier in App.jsx), so their opaque backgrounds silently painted over — and
+   blocked clicks on — the button on exactly those screens. Bumped above them
+   (still safely under modals at 999-1000) so it's genuinely visible everywhere.
+   ========================================== */
+.fullscreen-toggle-btn {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 600;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid #30363d;
+  background: rgba(33, 38, 45, 0.85);
+  color: #c9d1d9;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.fullscreen-toggle-btn:hover {
+  background: rgba(52, 152, 219, 0.25);
+  color: #58a6ff;
+}
+
+.fullscreen-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+/* ==========================================
+   📱 LANDSCAPE, SHORT VIEWPORT (phones in landscape)
+   ✅ Portrait is now blocked entirely, so the remaining overflow risk is
+   vertical: phones in landscape are wide but short (~330-420px tall).
+   Tightens the global button/base font so nothing pushes past the
+   viewport height. Game-specific compacting lives in GameScreen.jsx.
+   ========================================== */
+/* ==========================================
+   📱 SPACIOUS LANDSCAPE (tablets, iPads, unfolded
+   foldables, desktop browser windows)
+   ✅ Mirrors the equivalent tier added to GameScreen's
+   own .game-root CSS — this covers the surrounding
+   chrome (fullscreen toggle, base button size) that
+   lives outside GameScreen's own stylesheet.
+   ========================================== */
+@media (min-width: 1100px) and (min-height: 700px) and (orientation: landscape) {
+  body {
+    font-size: 1.32rem;
+  }
+
+  .fullscreen-toggle-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  body {
+    font-size: 0.8rem;
+  }
+
+  /* ✅ FIX: this 24px base padding (meant for the card-style menu/start screens) was
+     also squeezing the edge-to-edge .game-root gameplay layout on landscape phones —
+     the 480px-width breakpoint above never fires here since landscape phones are wide,
+     just short. That left visible dead space on both sides of Battle/Party columns. */
+  .fullscreen-game-container {
+    padding: 4px;
+    gap: 4px;
+  }
+
+  button {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+  }
+
+  .fullscreen-toggle-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+    bottom: 6px;
+    right: 6px;
+  }
+}
